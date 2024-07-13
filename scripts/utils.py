@@ -159,11 +159,11 @@ class Bullet(bf.DynamicEntity):
         self.surface = pygame.transform.rotate(s,90)
         self.rect.center = pos
         self.velocity.update(vel)
-        self.add_tags("bullet")
     def do_update(self, dt: float) -> None:
         self.move_by_velocity(dt)
         if self.parent_scene:
             if not self.parent_scene.camera.rect.colliderect(self.rect):
+                self.add_tags("used")
                 self.parent_scene.remove_world_entity(self)
 
     def draw(self, camera: bf.Camera) -> None:
@@ -187,6 +187,17 @@ class Explosion(bf.AnimatedSprite):
             bf.ResourceManager().get_image("graphics/animations/explosion.png",True),
             (32,32),[3,5,6,6,3,1]
         )
+
+    def do_when_added(self):
+        bf.AudioManager().play_sound("explosion")
+        if bf.ResourceManager().get_sharedVar("particles") == False:
+            return
+        pg : bf.ParticleGenerator = self.parent_scene.pg 
+        start = Vector2(0,1)
+        num = 16
+        for _ in range(num):
+            pg.add_particle(FireParticle(self.rect.center,start*100,0.7))
+            start.rotate_ip(360/num)
 
     def do_update(self, dt: float) -> None:
         if self.float_counter == 0:

@@ -23,7 +23,7 @@ class MyManager(bf.Manager):
     def do_pre_init(self) -> None:
         self.load_styles()
         self.load_audio()
-        self.set_sharedVar("particles",False)
+        self.set_sharedVar("particles",True)
 
     def load_styles(self):
         bf.StyleManager().add(MyStyle())
@@ -37,5 +37,5 @@ class MyManager(bf.Manager):
                 ("boot", "audio/sfx/boot.mp3"),
             ]
         )
-        bf.AudioManager().set_music_volume(0.0)
-        bf.AudioManager().set_sound_volume(0.0)
+        bf.AudioManager().set_music_volume(0.1)
+        bf.AudioManager().set_sound_volume(0.1)

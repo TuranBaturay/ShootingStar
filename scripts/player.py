@@ -15,14 +15,14 @@ class Player(bf.Sprite,bf.DynamicEntity):
         )
         self.h_speed = self.v_speed = 50
         self.spawner = bf.SceneTimer(0.07,self.spawn_particles,True,"game").start()
-        self.shoot_timer : bf.Timer = bf.SceneTimer(0.1,self.close_light,False,"game")
-
-
+        self.shoot_timer : bf.Timer = bf.SceneTimer(0.2,self.close_light,False,"game")
+        self.invincibility_timer = bf.SceneTimer(0.4,lambda:self.set_alpha(255),False,"game")
+        self.mask = pygame.mask.from_surface(self.surface)
     def shoot(self):
         self.open_light()
         self.shoot_timer.start()
         bf.AudioManager().play_sound("laserShoot")
-        self.parent_scene.add_world_entity(Bullet(self.rect.midtop,(0,-400)))
+        self.parent_scene.add_world_entity(Bullet(self.rect.midtop,(0,-400)).add_tags("bullet"))
 
     def open_light(self):
         self.light_on = True
@@ -54,6 +54,12 @@ class Player(bf.Sprite,bf.DynamicEntity):
     def do_reset_actions(self) -> None:
         self.actions.reset()
 
+    def collidemask(self,other:bf.Entity):
+        oMask   = pygame.mask.from_surface(other.surface)
+        xoffset = other.rect[0] - self.rect[0]
+        yoffset = other.rect[1] - self.rect[1]
+        return self.mask.overlap(oMask, (xoffset, yoffset))
+
     def do_update(self, dt: float) -> None:
         self.velocity *= 0.8
         if self.actions.is_active("up"):
@@ -73,6 +79,22 @@ class Player(bf.Sprite,bf.DynamicEntity):
         # if random.random() < 0.2:
         #     self.light_on = not self.light_on
 
+        if self.invincibility_timer.has_started():
+            self.set_alpha(255*cos(pygame.time.get_ticks()/30))
+
+        if not self.invincibility_timer.has_started():
+            for e in self.parent_scene.get_by_tags("e_bullet"):
+                if e.has_tags("used"):continue
+                if e.rect.colliderect(self.rect):
+
+
+                    if not self.collidemask(e):continue
+                    bf.AudioManager().play_sound("hitHurt")
+                    bf.ResourceManager().set_sharedVar("life",bf.ResourceManager().get_sharedVar("life")-10)
+                    self.invincibility_timer.start()
+                    self.parent_scene.remove_world_entity(e)
+                    e.add_tags("used")
+                    return
 
     def draw(self, camera: bf.Camera) -> None:
         super().draw(camera)

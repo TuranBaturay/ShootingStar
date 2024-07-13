@@ -3,32 +3,43 @@ import batFramework as bf
 
 class Chapter(bf.Cutscene):...
 
-class Control(bf.CutsceneBlock):
+class Control(bf.FunctionBlock):
     def __init__(self,value:bool)->None:
-        super().__init__()
-        self.value = value
+        if value:
+            func = bf.CutsceneManager().enable_player_control  
+        else:
+            func = bf.CutsceneManager().disable_player_control
+        super().__init__(func)
 
-    def start(self):
-        bf.CutsceneManager().enable_player_control() if self.value else bf.CutsceneManager().disable_player_control()
-        super().start()
-        self.end()
 ##############################################################################################  DIALOGUE SCENE
 
 """
 Shows the textbox (no change to the content)
 """
-class ShowText(bf.CutsceneBlock):...
+class ShowText(bf.FunctionBlock):
+    def __init__(self):
+        func =  lambda : bf.CutsceneManager().manager.get_scene("dialogue").set_show_text(True)
+        super().__init__(func)    
 
 """
 Hides the textbox
 """
-class HideText(bf.CutsceneBlock):...
+class HideText(bf.FunctionBlock):
+    def __init__(self):
+        super().__init__(lambda : bf.CutsceneManager().manager.get_scene("dialogue").set_show_text(False))    
+
 """
 Puts text to the textbox
 if textbox is hidden -> ShowText
 """
-class Say(bf.CutsceneBlock):...
-
+class Say(bf.CutsceneBlock):
+    def __init__(self, text:str) -> None:
+        super().__init__()
+        self.text = text
+    def start(self):
+        bf.CutsceneManager().manager.get_scene("dialogue").say(self.text)
+        bf.CutsceneManager().manager.get_scene("dialogue").set_message_end_callback(self.end)
+        
 
 """
 Set the background 
@@ -36,8 +47,19 @@ Set the background
     fadein and fadout are available
     if None the bg will be empty (if a scene is below it will show)
 """
-class BG(bf.CutsceneBlock):...
+class BG(bf.FunctionBlock):
+    def __init__(self,image=None,color=None):
+        super().__init__(None)
+        if image == color and color == None:
+            return
+        def func():
+            d = bf.CutsceneManager().manager.get_scene("dialogue")
+            if image:
+                d.set_background_image(image)
+            if color:
+                d.set_clear_color(color)
 
+        self.function =  func
 
 
 """
@@ -59,7 +81,10 @@ Clears the dialogue scene
 
 
 
-class Clear(bf.CutsceneBlock):...
+class Clear(bf.FunctionBlock):
+    def __init__(self) -> None:
+        super().__init__(None)
+        self.function = bf.CutsceneManager().manager.get_scene("dialogue").clear
 ##############################################################################################
 
 """
@@ -75,3 +100,13 @@ Starts a wave of enemies to defeat
 sets a shared flag to true when over
 """
 class Wave(bf.CutsceneBlock):...
+
+
+
+
+class GameOver(bf.CutsceneBlock):
+    def __init__(self):
+        super().__init__()
+        bf.SceneTransitionBlock("dialogue")
+        Say(f"GAME OVER\nYour score is {bf.ResourceManager().get_sharedVar("score")}")
+        bf.SceneTransitionBlock("title")

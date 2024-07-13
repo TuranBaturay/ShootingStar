@@ -12,9 +12,10 @@ class TitleScene(DefaultScene):
         self.root.add(bf.BasicDebugger())
         
         main = bf.Container(bf.Column(4).set_child_constraints(bf.FillX()))
-        
+        self.story_button = bf.Button("STORY",lambda : bf.CutsceneManager().play(Chapter1()))
         main.add(
-            bf.Button("PLAY",lambda :         bf.CutsceneManager().play(Chapter1())),
+            self.story_button,
+            bf.Button("DEMO",lambda : self.manager.transition_to_scene("game")),
             bf.Button("OPTIONS",lambda : self.manager.transition_to_scene("options")),
             bf.Button("QUIT",self.manager.stop)
         ).add_constraints(bf.MarginLeft(10),bf.PercentageRectMarginTop(0.5)

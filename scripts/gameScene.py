@@ -65,7 +65,6 @@ class BGStar(Star):
 class GameScene(DefaultScene):
     def __init__(self):
         super().__init__("game")
-        self.life = 100
         self.max_life = 100
 
     def do_when_added(self):
@@ -81,9 +80,12 @@ class GameScene(DefaultScene):
         self.add_actions(bf.Action("escape").add_key_control(pygame.K_ESCAPE))
         timer_duration = 0.4
         self.speed_factor = 5
-        self.spawner = bf.SceneTimer(timer_duration, self.spawn_stars, True,"game")#.start()
+        self.star_spawner = bf.SceneTimer(timer_duration, self.spawn_stars, True,"game").start()
+        self.enemy_spawner = bf.SceneTimer(2,self.spawn_enemies,True,"game").start()
+        bf.ResourceManager().set_sharedVar("wave",0)
+        bf.ResourceManager().set_sharedVar("score",0)
+        bf.ResourceManager().set_sharedVar("life",100)
 
-        bf.SceneTimer(2,lambda : self.add_world_entity(Enemy().set_position(100,0)) if len(self.world_entities) < 100 else None,True,"game").start()
 
         for _ in range(20):
             render_order = random.randint(1, 20)
@@ -97,7 +99,33 @@ class GameScene(DefaultScene):
         self.life_meter.set_outline_width(2).set_outline_color(bf.color.DARK_GB)
         self.life_meter.set_border_radius(4)
         self.life_meter.content.set_border_radius(2)
+        
+        self.score_label = bf.Label("0").add_constraints(bf.AnchorTopRight())
+        self.score_label.set_color((0,0,0,0)).set_relief(0)
+
         self.root.add(self.life_meter)
+        self.root.add(self.score_label)
+
+
+
+    def init(self):
+        bf.ResourceManager().set_sharedVar("wave",0)
+        bf.ResourceManager().set_sharedVar("score",0)
+        bf.ResourceManager().set_sharedVar("life",self.max_life)
+        self.player.set_center(*self.camera.rect.center)
+
+        self.world_entities.clear()
+        self.add_world_entity(self.pg,self.player)
+    def do_on_enter(self) -> None:
+        if self.manager.get_scene_at(1).name == "title":
+            self.init()
+
+    def spawn_enemies(self):
+        num = random.randint(1,3)
+        for _ in range(num):
+            x,y = random.randint(-100+bf.const.RESOLUTION[0]//2,100+bf.const.RESOLUTION[0]//2),-40-random.randint(0,100)
+            enemy = Enemy().set_center(x,y)
+            self.add_world_entity(enemy)
 
     def spawn_stars(self):
         if not self.get_sharedVar("particles"):
@@ -115,7 +143,8 @@ class GameScene(DefaultScene):
         if self.actions.is_active("escape"):
             self.manager.transition_to_scene("pause")
 
-        self.life_meter.set_value(self.life)
+        self.life_meter.set_value(bf.ResourceManager().get_sharedVar("life"))
+        self.score_label.set_text(str(bf.ResourceManager().get_sharedVar("score")))
 
     def calculate_star_properties(self, render_order):
         """Determine size and speed based on render order."""
