@@ -70,7 +70,6 @@ class Enemy(bf.DynamicEntity):
             self.current_patrol_index = (self.current_patrol_index + 1) % len(self.patrol_points)
 
     def do_update(self, dt: float) -> None:
-        if not self.parent_scene : return
         if self.behavior == "wander":
             self.update_wandering(dt)
         elif self.behavior == "chase":
@@ -83,6 +82,7 @@ class Enemy(bf.DynamicEntity):
                 self.parent_scene.add_world_entity(Explosion().set_center(*self.rect.center))
                 self.parent_scene.remove_world_entity(self, e)
                 e.add_tags("used")
+                return
 
         if self.rect.y > self.parent_scene.camera.rect.bottom:
             self.parent_scene.remove_world_entity(self)
