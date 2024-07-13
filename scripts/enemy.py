@@ -82,3 +82,6 @@ class Enemy(bf.DynamicEntity):
                 self.parent_scene.add_world_entity(Explosion().set_center(*self.rect.center))
                 self.parent_scene.remove_world_entity(self, e)
                 e.add_tags("used")
+
+        if self.rect.y > self.parent_scene.camera.rect.bottom:
+            self.parent_scene.remove_world_entity(self)
