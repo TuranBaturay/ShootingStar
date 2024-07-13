@@ -8,9 +8,8 @@ class Enemy(bf.DynamicEntity):
         super().__init__((32, 32), convert_alpha=True)
         self.surface = bf.ResourceManager().get_image("graphics/sprites/enemy.png", True)
         self.base_speed = 100  # Adjust base speed as needed
-        self.set_speed(self.base_speed)
+        self.velocity = Vector2(0, self.base_speed)  # Initially moving down
         self.behavior = "wander"  # Default behavior
-        self.direction = Vector2(1, 0)  # Default direction for movement
         self.patrol_points = [Vector2(random.randint(0, 800), random.randint(0, 600)) for _ in range(3)]  # Random patrol points
         self.current_patrol_index = 0
         self.chase_radius = 200  # Distance at which the enemy starts chasing the player
@@ -18,7 +17,7 @@ class Enemy(bf.DynamicEntity):
 
     def set_speed(self, speed: float):
         self.base_speed = speed
-        self.velocity = Vector2(0, self.base_speed)
+        self.velocity.y = self.base_speed
 
     def set_behavior(self, behavior: str):
         self.behavior = behavior
@@ -31,6 +30,9 @@ class Enemy(bf.DynamicEntity):
         self.spawner.delete()
 
     def spawn_particles(self):
+        if not self.parent_scene:
+            self.spawner.delete()
+            return
         if not self.parent_scene.get_sharedVar("particles"):
             return 
         for i in range(1):
@@ -41,8 +43,8 @@ class Enemy(bf.DynamicEntity):
             self.pg.add_particle(FireParticle(start_pos, start_vel, 0.6, bf.color.LIGHTER_GB))
 
     def update_wandering(self, dt: float):
-        self.direction = Vector2(random.uniform(-1, 1), random.uniform(-1, 1)).normalize()
-        self.velocity = self.direction * self.base_speed
+        # Wandering just moves downwards slowly
+        self.velocity = Vector2(0, self.base_speed * 0.5)
         self.move_by_velocity(dt)
 
     def update_chasing(self, dt: float):
@@ -54,7 +56,7 @@ class Enemy(bf.DynamicEntity):
         if distance_to_player < self.chase_radius:
             self.velocity = direction_to_player * self.base_speed
         else:
-            self.velocity = Vector2(0, 0)  # Stop if outside the chase radius
+            self.velocity = Vector2(0, self.base_speed)  # Continue moving downwards
 
         self.move_by_velocity(dt)
 
