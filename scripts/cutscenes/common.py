@@ -108,5 +108,5 @@ class GameOver(bf.CutsceneBlock):
     def __init__(self):
         super().__init__()
         bf.SceneTransitionBlock("dialogue")
-        Say(f"GAME OVER\nYour score is {bf.ResourceManager().get_sharedVar("score")}")
+        Say(f"GAME OVER\nYour score is {bf.ResourceManager().get_sharedVar('score')}")
         bf.SceneTransitionBlock("title")
