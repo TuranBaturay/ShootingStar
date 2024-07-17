@@ -106,8 +106,6 @@ class GameScene(DefaultScene):
         self.root.add(self.life_meter)
         self.root.add(self.score_label)
 
-
-
     def init(self):
         bf.ResourceManager().set_sharedVar("wave",0)
         bf.ResourceManager().set_sharedVar("score",0)
@@ -116,9 +114,15 @@ class GameScene(DefaultScene):
 
         self.world_entities.clear()
         self.add_world_entity(self.pg,self.player)
+
+    def do_on_enter_early(self) -> None:
+        if not bf.ResourceManager().get_sharedVar("particles"):
+            self.pg.clear()
+
     def do_on_enter(self) -> None:
         if self.manager.get_scene_at(1).name == "title":
             self.init()
+        self.player.actions.hard_reset()
 
     def spawn_enemies(self):
         num = random.randint(1,3)
@@ -151,4 +155,3 @@ class GameScene(DefaultScene):
         size = max(1,render_order//2)
         speed = self.speed_factor * render_order / 10.0  # Higher render order means faster speed
         return size, speed
-
