@@ -174,7 +174,7 @@ class Bullet(bf.DynamicEntity):
         if not s:
             s =pygame.Surface((value*2,value*2),pygame.SRCALPHA)
             # s.fill((100,100,100))
-            bf.utils.draw_spotlight((100,100,100),(0,0,0),int(value/2),int(value*1.2),s)
+            bf.utils.create_spotlight((100,100,100),(0,0,0),int(value/2),int(value*1.2),s)
             Bullet.cache[value] = s
         camera.surface.blit(s,(self.rect.move(-value,-value).center),special_flags=pygame.BLEND_RGBA_ADD)
 

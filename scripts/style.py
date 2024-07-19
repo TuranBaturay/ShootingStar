@@ -21,21 +21,21 @@ class MyStyle(bf.Style):
                 bf.color.DARKER_GB
             )
             w.set_color(bf.color.DARK_GB).set_shadow_color(bf.color.LIGHTER_GB)
-            w.enable_text_outline()
-            w.set_text_outline_mask_size((5,5))
-            w.set_text_outline_matrix(
-                [
-                    [1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1]
-                ])
-
+            # w.enable_text_outline()
+            # w.set_text_outline_mask_size((5,5))
             # w.set_text_outline_matrix(
-            #     [[1,1,1],
-            #      [1,0,1],
-            #      [1,1,1]])
+            #     [
+            #         [1, 1, 1, 1, 1],
+            #         [1, 1, 1, 1, 1],
+            #         [1, 1, 1, 1, 1],
+            #         [1, 1, 1, 1, 1],
+            #         [1, 1, 1, 1, 1]
+            #     ])
+
+            w.set_text_outline_matrix(
+                [[1,1,1],
+                 [1,0,1],
+                 [1,1,1]])
 
         if isinstance(w, bf.DialogueBox):
             w.set_padding((4, 4, 14, 4))

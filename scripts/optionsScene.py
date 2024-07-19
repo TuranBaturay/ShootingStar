@@ -22,8 +22,7 @@ class OptionsScene(DefaultScene):
             bf.Toggle("Particles",lambda v : self.set_sharedVar("particles",v),self.get_sharedVar("particles"))
         ).add_constraints(
             bf.MarginLeft(10),
-            bf.PercentageRectMarginTop(0.5),
-            bf.PercentageWidth(0.35)
+            bf.MarginBottom(10)
         ).set_outline_width(0)
         
         self.root.add(main)

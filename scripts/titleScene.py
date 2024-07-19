@@ -7,7 +7,7 @@ from .cutscenes import *
 class TitleScene(DefaultScene):
     def __init__(self):
         super().__init__("title")
-        self.vignette = bf.utils.draw_spotlight((255,100,100),(0,0,0),50,200,None,(1000,1000))
+        self.vignette = bf.utils.create_spotlight((255,100,100),(0,0,0),50,200,None,(1000,1000))
     def do_when_added(self):
         self.root.add(bf.BasicDebugger())
         

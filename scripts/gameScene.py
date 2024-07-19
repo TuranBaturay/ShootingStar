@@ -21,6 +21,7 @@ class BGStar(Star):
         self.speed = 1
         super().__init__(size)
         self.set_factor(0.5)
+        self.add_tags("star")
 
     def set_speed(self, speed) -> Self:
         self.speed = speed
@@ -66,6 +67,9 @@ class GameScene(DefaultScene):
     def __init__(self):
         super().__init__("game")
         self.max_life = 100
+        self.filter : pygame.Surface = pygame.Surface(self.camera.rect.size)
+        self.vignette : pygame.Surface = pygame.Surface(self.camera.rect.size)
+
 
     def do_when_added(self):
         self.pg = bf.ParticleGenerator()
@@ -80,20 +84,12 @@ class GameScene(DefaultScene):
         self.add_actions(bf.Action("escape").add_key_control(pygame.K_ESCAPE))
         timer_duration = 0.4
         self.speed_factor = 5
-        self.star_spawner = bf.SceneTimer(timer_duration, self.spawn_stars, True,"game").start()
+        # self.star_spawner = bf.SceneTimer(timer_duration, self.spawn_stars, True,"game").start()
         self.enemy_spawner = bf.SceneTimer(2,self.spawn_enemies,True,"game").start()
         bf.ResourceManager().set_sharedVar("wave",0)
         bf.ResourceManager().set_sharedVar("score",0)
         bf.ResourceManager().set_sharedVar("life",100)
 
-
-        for _ in range(20):
-            render_order = random.randint(1, 20)
-            size, speed = self.calculate_star_properties(render_order)
-            position = random.randrange(0, int(self.camera.rect.w)), random.randrange(0, int(self.camera.rect.h))
-            self.add_world_entity(
-                BGStar((size, size)).set_speed(speed).set_render_order(render_order).set_center(*position)
-            )
 
         self.life_meter = bf.Meter(0,100,1).add_constraints(bf.AnchorBottom(),bf.PercentageWidth(0.2)).set_size((None,20))
         self.life_meter.set_outline_width(2).set_outline_color(bf.color.DARK_GB)
@@ -118,6 +114,8 @@ class GameScene(DefaultScene):
     def do_on_enter_early(self) -> None:
         if not bf.ResourceManager().get_sharedVar("particles"):
             self.pg.clear()
+            es = [s for s in self.world_entities if s.has_tags("star")]
+            self.remove_world_entity(*es)
 
     def do_on_enter(self) -> None:
         if self.manager.get_scene_at(1).name == "title":
@@ -155,3 +153,23 @@ class GameScene(DefaultScene):
         size = max(1,render_order//2)
         speed = self.speed_factor * render_order / 10.0  # Higher render order means faster speed
         return size, speed
+
+
+    def do_post_world_draw(self, surface: pygame.Surface):
+        # return
+        # pygame.transform.grayscale(surface.copy(),surface)
+        # self.filter.fill((200,200,127 + 128*cos(pygame.time.get_ticks()/200)))
+
+        # surface.blit(self.filter,(0,0),special_flags=pygame.BLEND_MULT)
+        self.vignette.fill((0,0,0))
+        bf.utils.draw_spotlight(self.vignette,(255,255,255),(0,0,0),100,200)
+
+        # self.vignette.blit(
+        #     bf.utils.create_spotlight((255,255,255),(0,0,0),30,80),
+        #     self.player.rect.move(-80,-80).center,
+        #     special_flags=pygame.BLEND_RGB_ADD
+        # )
+        # surface.blit(self.vignette,(0,0))
+        
+        surface.blit(self.vignette,(0,0),special_flags=pygame.BLEND_MULT)
+        return
